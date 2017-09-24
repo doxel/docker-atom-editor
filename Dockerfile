@@ -1,8 +1,10 @@
-FROM ubuntu:latest
+FROM debian:stretch-slim
 
 ENV ATOM_VERSION v1.20.1
 
-RUN apt-get update && \
+ARG debian_mirror=deb.debian.org
+RUN sed -r -i -e s/deb.debian.org/$debian_mirror/ /etc/apt/sources.list \
+ && apt-get update && \
     apt-get install -y --no-install-recommends \
       ca-certificates \
       curl \
@@ -23,11 +25,12 @@ RUN apt-get update && \
       libgl1-mesa-glx \
       libgl1-mesa-dri \
       python \
+      wget \
       xdg-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    curl -L https://github.com/atom/atom/releases/download/${ATOM_VERSION}/atom-amd64.deb > /tmp/atom.deb && \
-    dpkg -i /tmp/atom.deb && \
+    wget -c https://github.com/atom/atom/releases/download/${ATOM_VERSION}/atom-amd64.deb -O /tmp/atom.deb && \
+    apt install /tmp/atom.deb && \
     rm -f /tmp/atom.deb && \
     useradd -d /home/atom -m atom
 
